@@ -1,0 +1,132 @@
+﻿@attribute [Route(Route.Registration)]
+@using BaseMigrationUI.Enum
+@using SharedLibrary.Enum
+@layout MainLayout;
+@inject RegistrationRequestValidator registrationRequestValidator;
+@inject LoginRequestValidator loginRequestValidator;
+
+
+@if (isRegistrationProcess)
+{
+	<MudForm @ref="formRegistration" Validation="registrationRequestValidator.ValidateValue" Model="@registrationModel">
+		<MudCardContent>
+
+
+			<MudItem>
+				<MudTextField T="string"
+							  @bind-Value="registrationModel.FirstName"
+							  Label="First name"
+							  For="@(() => registrationModel.FirstName)"
+							  Immediate="true" />
+			</MudItem>
+
+			<MudItem>
+				<MudTextField T="string"
+							  @bind-Value="registrationModel.LastName"
+							  Label="Last name"
+							  For="@(() => registrationModel.LastName)"
+							  Immediate="true" />
+			</MudItem>
+
+			<MudItem Class="py-2">
+				<MudDatePicker Class="mud-picker-calendar-container" Label="Date of birth"
+							   @bind-Date="registrationModel.DateOfBirth"
+							   ShowToolbar="false"
+							   ReadOnly="false" />
+			</MudItem>
+
+			<MudItem>
+				<MudSelect T="Country" @bind-Value="registrationModel.Country" Label="Country" Variant="Variant.Outlined">
+					@foreach (var country in Enum.GetValues(typeof(Country)).Cast<Country>())
+					{
+						<MudSelectItem Value="@country">@country.ToString()</MudSelectItem>
+					}
+				</MudSelect>
+			</MudItem>
+
+			<MudTextField T="string"
+						  @bind-Value="registrationModel.Email"
+						  Label="Email"
+						  For="@(() => registrationModel.Email)"
+						  Immediate="true" />
+
+			<MudTextField T="string"
+						  @bind-Value="registrationModel.Password"
+						  Label="Password"
+						  For="@(() => registrationModel.Password)"
+						  Immediate="true" />
+
+			<MudTextField T="string"
+						  @bind-Value="registrationModel.RepeatPassword"
+						  Label="RepeatPassword"
+						  For="@(() => registrationModel.RepeatPassword)"
+						  Immediate="true" />
+			
+
+			<MudCardActions Class="pl-0">
+				<MudGrid Spacing="2" Class="mt-2">
+
+					<MudItem md="12">
+						<MudButton Color="Color.Primary" Variant="Variant.Filled" OnClick="() => OnRegister()">
+							@RegisterText
+						</MudButton>
+					</MudItem>
+
+					<MudItem md="12">
+						<MudButton OnClick="() => OpenLoginCard()">
+							@LoginText
+						</MudButton>
+					</MudItem>
+
+				</MudGrid>
+			</MudCardActions>
+
+		</MudCardContent>
+
+	</MudForm>
+}
+else
+{
+	<MudForm @ref="formLogin" Validation="loginRequestValidator.ValidateValue" Model="@loginRequest">
+
+		<MudCardContent>
+
+			<MudItem>
+				<MudTextField T="string"
+							  @bind-Value="loginRequest.Email"
+							  Label="Email"
+							  For="@(() => loginRequest.Email)"
+							  Immediate="true" />
+			</MudItem>
+
+			<MudItem>
+				<MudTextField T="string"
+							  @bind-Value="loginRequest.Password"
+							  Label="Password"
+							  For="@(() => loginRequest.Password)"
+							  Immediate="true" />
+			</MudItem>
+
+			<MudCardActions Class="pl-0">
+				<MudGrid Spacing="2" Class="mt-2">
+
+					<MudItem md="12">
+						<MudButton Color="Color.Primary" Variant="Variant.Filled" OnClick="() => OnLogin()">
+							@LoginText
+						</MudButton>
+					</MudItem>
+
+					<MudItem md="12">
+						<MudButton OnClick="() => OpenRegisterCard()">
+							@RegisterText
+						</MudButton>
+					</MudItem>
+
+				</MudGrid>
+			</MudCardActions>
+
+		</MudCardContent>
+	</MudForm>
+
+}
+

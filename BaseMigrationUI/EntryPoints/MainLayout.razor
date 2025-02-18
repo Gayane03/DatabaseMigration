@@ -1,0 +1,64 @@
+﻿@inherits LayoutComponentBase
+@inject NavigationManager Navigation
+
+<style>
+	.header {
+		margin-top: 30px !important;
+		display: flex !important;
+		justify-content: center !important;
+		align-items: center !important;
+		height: 20vh !important;
+		color: #305a77 !important;
+		background-color: #d2d2dc !important;
+	}
+
+	.footer {
+		display: flex !important;
+		justify-content: center !important;
+		align-items: center !important;
+		height: 4vh;
+		color: #305a77 !important;
+		background-color: #d2d2dc !important;
+	}
+
+</style>
+
+<MudLayout>
+	<header>
+		<div class="header">
+			<h1>
+				BASE MIGRATION
+			</h1>
+		</div>
+	</header>
+
+	<div class="row">
+		<div class="d-flex justify-content-center" style="margin-top: 24px !important">
+			<MudCard Elevation="2">
+					@Body <!-- This is where the page content will be rendered -->	
+			</MudCard>
+		</div>
+	</div>
+
+
+	<div class="row" style="padding-top: 16px !important">
+		<div class="footer">
+			<footer>
+				<p style="margin: 0">@DateTime.Now.Year</p>
+			</footer>
+		</div>
+	</div>
+
+</MudLayout>
+
+@code {
+
+	protected override void OnAfterRender(bool firstRender)
+	{
+		if (firstRender)
+		{
+			Navigation.NavigateTo(Route.Registration);
+
+		}
+    }
+}

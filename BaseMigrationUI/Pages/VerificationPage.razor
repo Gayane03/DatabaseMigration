@@ -1,0 +1,82 @@
+﻿@using SharedLibrary.RequestModels
+@using SharedLibrary.ResponseModels
+@attribute [Route(Route.Verification)]
+@layout MainLayout;
+@inject VerifyEmailRequestValidator verifyEmailRequestValidator;
+@inject ApiController apiController;
+@inject ResponseMessageUtile responseMessageUtile;
+@inject NavigationManager navigationManager;
+@inject LocalStorageHelper localStorageHelper;
+
+<MudForm @ref="form" Validation="verifyEmailRequestValidator.ValidateValue" Model="@verifyEmailRequest">
+	<MudCardContent>
+
+		<MudItem>
+			<MudTextField T="int"
+						  @bind-Value="verifyEmailRequest.VerificationCode"
+						  Label="( Enter your email code )"
+						  For="@(() => verifyEmailRequest.VerificationCode)"
+						  Immediate="true" />
+		</MudItem>
+
+		<MudCardActions Class="pl-0">
+			<MudGrid Spacing="2" Class="mt-2">
+
+				<MudItem md="12">
+					<MudButton Color="Color.Primary" Variant="Variant.Filled" OnClick="() => OnSendVerificationCode()">
+						Send verification code
+					</MudButton>
+				</MudItem>
+
+			</MudGrid>
+		</MudCardActions>
+
+	</MudCardContent>
+</MudForm>
+
+@code {
+
+	MudForm? form;
+
+	private EmailVerificationCodeRequest verifyEmailRequest = new();
+	private RegistrationResponse? registrationResponse;
+
+	private async Task OnSendVerificationCode()
+	{
+		try
+		{
+			form?.Validate();
+
+			if (form!.IsValid)
+			{
+				var token = await localStorageHelper.GetToken(TokenStorageName.EmailVerification);
+				if (string.IsNullOrEmpty(token))
+				{
+					throw new Exception("there is not token in local storage.");
+				}
+
+				var response = await apiController.VerifyUserEmail(verifyEmailRequest, token);
+				registrationResponse = await responseMessageUtile.HandleResponse<RegistrationResponse>(response);
+
+				if (string.IsNullOrEmpty(registrationResponse!.Token))
+				{
+					throw new Exception("Token is null.");
+
+				}
+
+				await localStorageHelper.RemoveToken(TokenStorageName.EmailVerification);
+				await localStorageHelper.SaveToken(TokenStorageName.UserAccess, registrationResponse.Token);
+
+				//need go to main page 
+				navigationManager.NavigateTo(Route.BaseMigration);
+			}
+		}
+		catch (Exception ex)
+		{
+			// navigationManager.NavigateTo($"/{Route.NotFound}?error={Uri.EscapeDataString(ex.Message)}");
+			navigationManager?.NavigateTo(Route.NotFound);
+
+		}
+	}
+
+}
