@@ -14,14 +14,11 @@ namespace RepositoryLayer
 		private SqlDataReader? sqlDataReader = null;
 
 		private const int SingleUserProcessCount = 1;
-
-
  		protected CoreBaseRepository(IConfiguration configuration)
 		{
 			connectionString = configuration?.GetConnectionString("DefaultConnection");
 		}
 
-	
 		protected async Task<TResult?> Get<T,TResult>(
 			Func<SqlDataReader,TResult> func,
 			Dictionary<string,object>? parameters = null,
@@ -57,10 +54,10 @@ namespace RepositoryLayer
 				{
 					return func.Invoke(sqlDataReader);
 				}
-				else
-				{
-					throw new Exception("SqlReader is not read.");
-				}
+				//else
+				//{
+				//	throw new Exception("SqlReader is not read.");
+				//}
 			}
 			catch (Exception ex)
 			{

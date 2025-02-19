@@ -4,6 +4,7 @@
     {   
         Task OpenConnectionAsync();
         void OpenCommand(string commandText);
-
-    }
+        Task OpenDataReaderAsync();
+        Task BeginTransactionAsync();
+	}
 }

@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using BusinessLayer.Autho;
+using BusinessLayer.Extensions;
 using BusinessLayer.Helper;
 using BusinessLayer.Helper.ModelHelper;
 using BusinessLayer.Services.EmailSender;
@@ -50,8 +51,10 @@ namespace BusinessLayer.Services
 				var userId = Int32.Parse(verifiedUserId.Value);
 
 				await registrationRepository.ChangeUserToActive(userId);
+				var roleId = await registrationRepository.GetUserRoleId(userId);
+				var roleName = ((RoleType)roleId).ToStringRole();
 
-				var userAccessToken = jwtTokenHandlerService.GenerateJwtToken(verifiedUserId.Value, Role.Admin);
+				var userAccessToken = jwtTokenHandlerService.GenerateJwtToken(verifiedUserId.Value, roleName);
 
 				return Result<RegistrationResponse>.Success(new(userAccessToken));
 			}
@@ -112,7 +115,10 @@ namespace BusinessLayer.Services
 					return Result<LoginResponse>.Failure(Message.LoginFailError);
 				}
 
-				var accessToken = jwtTokenHandlerService.GenerateJwtToken(loginUserModel.Id.ToString(), Role.Admin);
+				var roleId = loginUserModel.RoleId;
+				var roleName = ((RoleType)roleId).ToStringRole();
+
+				var accessToken = jwtTokenHandlerService.GenerateJwtToken(loginUserModel.Id.ToString(), roleName);
 
 				return Result<LoginResponse>.Success(new(accessToken));
 			}

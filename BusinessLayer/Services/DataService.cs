@@ -13,22 +13,29 @@ namespace BusinessLayer.Services
                 this.migrationRepository = migrationRepository;
         }
 
-        public async Task<Result<IEnumerable<string>>> GetTables(DatabaseRequest databaseRequest)
+        public async Task<Result<IEnumerable<MigratedTableRequest>>> GetTables(ServerRequest databaseRequest)
         {
             try
             {
                 var tables = await migrationRepository.GetTables(databaseRequest);
 
-                if (tables == default(IEnumerable<string>) || !tables.Any()) 
+                var migratedTableRequest = new List<MigratedTableRequest>();
+
+                foreach (var table in tables)
                 {
-                    return Result<IEnumerable<string>>.Failure(Message.TableGettingProblem);
+                    migratedTableRequest.Add(new MigratedTableRequest() { TableName = table ,IsContainFK = false});
                 }
 
-                return Result<IEnumerable<string>>.Success(tables);
+                if (tables == default(IEnumerable<string>) || !tables.Any()) 
+                {
+                    return Result<IEnumerable<MigratedTableRequest>>.Failure(Message.TableGettingProblem);
+                }
+
+                return Result<IEnumerable<MigratedTableRequest>>.Success(migratedTableRequest);
             }
             catch (Exception ex)
             {
-                return Result<IEnumerable<string>>.Failure(Message.SystemError);
+                return Result<IEnumerable<MigratedTableRequest>>.Failure(Message.SystemError);
             }
         }
     }

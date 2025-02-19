@@ -9,7 +9,7 @@ namespace RepositoryLayer
         public MigrationRepository(IConfiguration configuration) : base(configuration){}
 
 
-        public async Task<IEnumerable<string>> GetTables(DatabaseRequest databaseRequest)
+        public async Task<IEnumerable<string>> GetTables(ServerRequest databaseRequest)
         {
             DataTable? tables = null;
             List<string> tablesNames = new List<string>();

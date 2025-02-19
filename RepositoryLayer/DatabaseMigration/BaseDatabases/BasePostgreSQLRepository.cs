@@ -3,11 +3,11 @@ using System.Data;
 
 namespace RepositoryLayer.DatabaseMigration.BaseDatabases
 {
-    public abstract class BasePostgreSQLRepository : BaseRepository, IBaseRepository
+    public abstract class BasePostgreSQLRepository : BaseRepository
     {
         public BasePostgreSQLRepository(string connectionPath) : base(connectionPath) { }
 
-        public async Task OpenConnectionAsync()
+        public override async Task OpenConnectionAsync()
         {
             if (SqlConnection == null || SqlConnection.State != ConnectionState.Open)
             {
@@ -16,10 +16,9 @@ namespace RepositoryLayer.DatabaseMigration.BaseDatabases
             }
         }
 
-        public void OpenCommand(string commandText)
+        public override void OpenCommand(string commandText)
         {
             SqlCommand = new NpgsqlCommand(commandText, (NpgsqlConnection)SqlConnection);          
         }
-
     }
 }

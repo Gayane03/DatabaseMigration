@@ -1,8 +1,6 @@
-﻿using RepositoryLayer.DatabaseMigration;
-using RepositoryLayer.DatabaseMigration.FromDatabases;
+﻿using RepositoryLayer.DatabaseMigration.FromDatabases;
 using RepositoryLayer.DatabaseMigration.ToDatabases;
 using SharedLibrary.Enum;
-
 
 namespace BusinessLayer.Helper.DesignPatterns
 {
@@ -13,8 +11,8 @@ namespace BusinessLayer.Helper.DesignPatterns
             return serverType switch
             {
                 ServerType.MSSQL => new FromMSSQLConnector(connectionPath),
-                //ServerType.PostgreSQL => new PostgreSqlControlRepository(connectionString),
-                // "mysql" => new MySQLHelper(connectionString),
+                ServerType.PostgreSQL => new FromPostgreSQLConnector(connectionPath),
+				ServerType.MySQL => new FromMySQLConnector(connectionPath),
                 _ => throw new ArgumentException("Unsupported database type.")
             };
         }
@@ -23,9 +21,9 @@ namespace BusinessLayer.Helper.DesignPatterns
         {
             return serverType switch
             {
-                //ServerType.MSSQL => new FromMSSQLConnector(connectionPath),
+                ServerType.MSSQL => new ToMSSQLConnector(connectionPath),
                 ServerType.PostgreSQL => new ToPostgreSQLConnector(connectionPath),
-                // "mysql" => new MySQLHelper(connectionString),
+                ServerType.MySQL => new ToMySQLConnector(connectionPath),
                 _ => throw new ArgumentException("Unsupported database type.")
             };
         }

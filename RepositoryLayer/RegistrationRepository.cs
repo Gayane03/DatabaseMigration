@@ -2,6 +2,7 @@
 using RepositoryLayer.Helper;
 using SharedLibrary.DbModels.Request;
 using SharedLibrary.DbModels.Response;
+using SharedLibrary.RequestModels;
 
 namespace RepositoryLayer
 {
@@ -20,6 +21,7 @@ namespace RepositoryLayer
 			parameters.Add($"@{nameof(User.Email)}", user.Email);
 			//parameters.Add($"@{nameof(User.DateOfBirth)}", "2025-02-07 16:06:26.977");
 			parameters.Add($"@{nameof(User.IsActive)}", 0);
+			parameters.Add($"@{nameof(User.RoleId)}", 1);
 
 			var userId = await Insert<User>(parameters);
 			return userId;
@@ -66,6 +68,15 @@ namespace RepositoryLayer
 
 			return await Delete<User>(parameters, whereConditionBody);
 
+		}
+		public async Task<int> GetUserRoleId(int userId)
+		{
+			var parameters = new Dictionary<string, object>();
+			parameters.Add($"Id", userId);
+
+			var whereConditionBody = $" Id = @Id";
+			var roleResponse = await Get<User, RoleResponse>(ResponseModelGenerator.GenerateRoleResponse, parameters, whereConditionBody);
+			return roleResponse!.RoleId;
 		}
 	}
 }

@@ -5,6 +5,6 @@ namespace BusinessLayer.Services.DatabaseMigrationHelper
 {
     public interface IDatabaseMigrationService
     {
-        Task<Result<bool>> TransferTables(IEnumerable<TransferTableRequest> transferTableRequest);
-    }
+		Task<Result<bool?>> TryMigrateTables(MigrationRequest migratedTablesRequest);
+	}
 }

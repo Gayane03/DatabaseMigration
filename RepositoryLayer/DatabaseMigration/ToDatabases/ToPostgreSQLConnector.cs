@@ -1,5 +1,4 @@
-﻿using Microsoft.Data.SqlClient;
-using Npgsql;
+﻿using Npgsql;
 using RepositoryLayer.DatabaseMigration.BaseDatabases;
 using RepositoryLayer.Helper;
 using SharedLibrary.DbModels;
@@ -10,16 +9,16 @@ namespace RepositoryLayer.DatabaseMigration.ToDatabases
 {
     public class ToPostgreSQLConnector : BasePostgreSQLRepository, IToDatabaseConnector
     {
-        public ToPostgreSQLConnector(string connectionPath) : base(connectionPath) { }
+        public ToPostgreSQLConnector(string connectionPath) : base(connectionPath) {}
 
-        public async Task CreateTable(ServerType fromServerType, string tableName, IEnumerable<ColumnInfo> columnsInfo)
+		public async Task CreateTable(ServerType fromServerType, string tableName, IEnumerable<ColumnInfo> columnsInfo)
         {
             try
             {
                 await OpenConnectionAsync();
                 await BeginTransactionAsync();
 
-                var createTableQuery = new StringBuilder();
+				var createTableQuery = new StringBuilder();
                 createTableQuery.Append($"CREATE TABLE \"{tableName}\" (");
 
                 var primaryKeyColumns = new List<string>();
@@ -53,27 +52,17 @@ namespace RepositoryLayer.DatabaseMigration.ToDatabases
                 OpenCommand(commandText);
                 SqlCommand!.ExecuteNonQuery();
 
-
-                await SqlTransaction!.CommitAsync();
             }
             catch (Exception ex)
             {
-                await SqlTransaction!.RollbackAsync();
                 throw;
-            }
-            finally
-            {
-                Dispose();
             }
         }
 
         public async Task InsertTableData(string tableName, IEnumerable<Dictionary<string, object>> tableData)
         {
             try
-            {
-                await OpenConnectionAsync();
-                await BeginTransactionAsync();
-
+            {             
                 foreach (var row in tableData)
                 {
                     var escapedTableName = $"\"{tableName}\"";
@@ -91,21 +80,28 @@ namespace RepositoryLayer.DatabaseMigration.ToDatabases
                         SqlCommand!.Parameters.Add(new NpgsqlParameter($"@p{paramIndex}", keyValue.Value ?? DBNull.Value));
                         paramIndex++;
                     }
-
                     await SqlCommand!.ExecuteNonQueryAsync();
                 }
-
-                await SqlTransaction!.CommitAsync();
             }
             catch (Exception ex)
             {
-                await SqlTransaction!.RollbackAsync();
                 throw;
             }
-            finally
-            {
-                Dispose();
-            }
         }
-    }
+
+		public async Task CommitTransaction()
+		{
+			await SqlTransaction!.CommitAsync();
+		}
+
+		public async Task RollbackTransaction()
+		{
+		   await SqlTransaction!.RollbackAsync();
+		}
+
+		public void Dispose()
+		{
+            base.Dispose();
+		}
+	}
 }

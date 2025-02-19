@@ -1,5 +1,4 @@
-﻿using AutoMapper.Configuration.Annotations;
-using BusinessLayer.Helper;
+﻿using BusinessLayer.Helper;
 using BusinessLayer.Helper.DesignPatterns;
 using BusinessLayer.Helper.ModelHelper;
 using SharedLibrary.RequestModels;
@@ -8,27 +7,53 @@ namespace BusinessLayer.Services.DatabaseMigrationHelper
 {
     public class DatabaseMigrationService : IDatabaseMigrationService
     {
-
-        public async Task<Result<bool>> TransferTables(IEnumerable<TransferTableRequest> transferTableRequest)
+        public async Task<Result<bool?>> TryMigrateTables(MigrationRequest migratedTablesRequest)
         {
 			try
 			{
-				var tablesNonContainFK = transferTableRequest.Where(table => !table.IsContainFK).FirstOrDefault();
+				var migratedTablesWithoutFK = migratedTablesRequest.MigratedTablesInfoRequest.Where(table => !table.IsContainFK);
 
-                var fromDatabase = DatabaseMigrationHelperFactory.GetFromDatabaseConnector(tablesNonContainFK.FromServerType, tablesNonContainFK.FromServerConnection);
-				var currentTableColumnInfo = await fromDatabase.GetTableSchema(tablesNonContainFK!.FromTableName);
-				var currentTableData = await fromDatabase.GetTableData(tablesNonContainFK!.FromTableName);	
+				var tasks = migratedTablesWithoutFK
+					.Select(migratedTable => Task.Run(() => MigrateTableAsync(migratedTablesRequest.FromDatabaseRequest, 
+					                                                          migratedTablesRequest.ToDatabaseRequest, 
+																			  migratedTable))).ToArray();
 
-				var toDatabase = DatabaseMigrationHelperFactory.GetToDatabaseConnector(tablesNonContainFK.ToServerType, tablesNonContainFK.ToServerConnection);
-                await toDatabase.CreateTable(tablesNonContainFK.FromServerType, tablesNonContainFK.FromTableName, currentTableColumnInfo);
-				await toDatabase.InsertTableData(tablesNonContainFK.FromTableName,currentTableData);
+				await Task.WhenAll(tasks);
 
-				return Result<bool>.Success(true);
+				return Result<bool?>.Success(true);
 			}
 			catch (Exception ex)
 			{
-				return Result<bool>.Failure(Message.TableTransferProcessFail);
+				return Result<bool?>.Failure(Message.TableTransferProcessFail);
 			}
         }
-    }
+
+		private async Task MigrateTableAsync(ServerRequest fromServerRequest,ServerRequest toServerRequest,MigratedTableRequest migratedTable)
+		{
+			try
+			{
+				var fromServerType = fromServerRequest.ServerType;
+				var fromConnectionPath = fromServerRequest.DatabaseConnection;
+
+				var toServerType = toServerRequest.ServerType;
+				var toConnectionPath = toServerRequest.DatabaseConnection;
+
+				var migratedTableName = migratedTable.TableName;
+
+				var fromDatabaseConnector = DatabaseMigrationHelperFactory.GetFromDatabaseConnector(fromServerType,fromConnectionPath);
+
+				var schema = await fromDatabaseConnector.GetTableSchema(migratedTableName);
+				var data = await fromDatabaseConnector.GetTableData(migratedTableName);
+
+				using (var toDatabaseConnector = DatabaseMigrationHelperFactory.GetToDatabaseConnector(toServerType,toConnectionPath))
+
+				await toDatabaseConnector.StructedTableWithData(migratedTableName, fromServerType, schema, data);
+
+			}
+			catch (Exception ex)
+			{
+				throw new Exception(ex.Message);
+			}
+		}
+	}
 }

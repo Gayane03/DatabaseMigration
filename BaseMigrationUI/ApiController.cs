@@ -1,4 +1,5 @@
-﻿using SharedLibrary.RequestModels;
+﻿using BaseMigrationUI.Models;
+using SharedLibrary.RequestModels;
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
 
@@ -27,6 +28,16 @@ namespace BaseMigrationUI
 		public async Task<HttpResponseMessage> LoginUser(LoginRequest loginRequest)
 		{
 			return await httpClient.PostAsJsonAsync("User/login", loginRequest);
+		}
+
+		public async Task<HttpResponseMessage?> GetDatabaseTables(ServerRequest serverRequest)
+		{
+            return await httpClient.PostAsJsonAsync("Migration/getTables", serverRequest);
+        }
+
+		public async Task<HttpResponseMessage?> MigrateTables(MigrationRequest migrationRequest)
+		{
+			return await httpClient.PostAsJsonAsync("Migration/migrateTables", migrationRequest);
 		}
 
 	}

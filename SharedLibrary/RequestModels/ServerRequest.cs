@@ -2,9 +2,9 @@
 
 namespace SharedLibrary.RequestModels
 {
-    public class DatabaseRequest
+    public class ServerRequest
     {
-        public ServerType Server { get; set; }
+        public ServerType ServerType { get; set; }
         public string? DatabaseConnection { get; set; }    
     }
 }

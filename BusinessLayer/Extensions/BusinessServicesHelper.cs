@@ -13,18 +13,18 @@ namespace BusinessLayer.Helper
 	{
 		public static IServiceCollection AddDependencies(this IServiceCollection services)
 		{
-            services.AddScoped<IUserService, UserService>();
+			services.AddScoped<IUserService, UserService>();
 			services.AddScoped<IJwtTokenHandlerService, JwtTokenHandlerService>();
 			services.AddScoped<IEmailVerificationTokenService, EmailVerificationTokenService>();
 			services.AddScoped<IEmailSenderService, EmailSenderService>();
 			services.AddScoped<IEmailVerificationService, EmailVerificationService>();
 			services.AddScoped<IDataService, DataService>();
-			services.AddScoped<IDatabaseMigrationService,DatabaseMigrationService>();	
+			services.AddScoped<IDatabaseMigrationService, DatabaseMigrationService>();
 			services.AddScoped<Profile, MappingProfile>();
 
 			// repository layer
 			services.AddScoped<IRegistrationRepository, RegistrationRepository>();
-			services.AddScoped<IMigrationRepository, MigrationRepository>();	
+			services.AddScoped<IMigrationRepository, MigrationRepository>();
 
 			return services;
 		}

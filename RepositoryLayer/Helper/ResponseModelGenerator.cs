@@ -17,5 +17,9 @@ namespace RepositoryLayer.Helper
 		{
 			return new() { Id = reader.GetInt32(reader.GetOrdinal("Id")) };
 		}
+		public static RoleResponse GenerateRoleResponse(SqlDataReader reader)
+		{
+			return new() { RoleId = reader.GetInt32(reader.GetOrdinal("RoleId")) };
+		}
 	}
 }

@@ -11,6 +11,7 @@ namespace SharedLibrary.DbModels.Request
 		public string Email { get; set; }
 		public string PasswordHash { get; set; }
 		public bool IsActive { get; set; } = false;
+		public int RoleId { get; set; } = 1;
 
 	}
 }

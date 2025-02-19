@@ -19,7 +19,7 @@ namespace BaseMigrationApi.Controllers
         }
 
         [HttpPost("getTables")]
-        public async Task<IActionResult> GetDatabaseTables([FromBody] DatabaseRequest databaseRequest)
+        public async Task<IActionResult> GetDatabaseTables([FromBody] ServerRequest databaseRequest)
         {
             var result = await dataService.GetTables(databaseRequest);
 
@@ -31,10 +31,10 @@ namespace BaseMigrationApi.Controllers
             return Ok(result.Value);
         }
 
-        [HttpPost("transferTables")]
-        public async Task<IActionResult> TransferTables([FromBody] IEnumerable<TransferTableRequest> transferTableRequest)
+        [HttpPost("migrateTables")]
+        public async Task<IActionResult> MigrateTables([FromBody] MigrationRequest migrationRequest)
         {
-            var result = await databaseMigrationService.TransferTables(transferTableRequest);
+            var result = await databaseMigrationService.TryMigrateTables(migrationRequest);
 
             if (!result.IsSuccess)
             {
