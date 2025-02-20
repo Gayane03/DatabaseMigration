@@ -55,7 +55,7 @@ namespace RepositoryLayer.DatabaseMigration.FromDatabases
 			{
 				await OpenConnectionAsync();
 
-				string query = $"SELECT * FROM `{tableName}` LIMIT 1";
+				string query = $"SELECT * FROM `{tableName}` ";
 				OpenCommand(query);
 
 				await OpenDataReaderAsync();

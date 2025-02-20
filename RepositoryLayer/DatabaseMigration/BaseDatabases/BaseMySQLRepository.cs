@@ -18,7 +18,8 @@ namespace RepositoryLayer.DatabaseMigration.BaseDatabases
 		public override void OpenCommand(string commandText)
 		{
 			SqlCommand = new MySqlCommand(commandText, (MySqlConnection)SqlConnection);
-		}
+            SqlCommand!.CommandTimeout = 300;
+        }
 	}
 
 }

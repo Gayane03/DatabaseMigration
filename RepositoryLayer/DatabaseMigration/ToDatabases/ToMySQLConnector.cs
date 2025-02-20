@@ -50,7 +50,7 @@ namespace RepositoryLayer.DatabaseMigration.ToDatabases
 
 				var commandText = createTableQuery.ToString();
 				OpenCommand(commandText);
-				SqlCommand!.ExecuteNonQuery();
+				//SqlCommand!.ExecuteNonQuery();
 
 			}
 			catch (Exception ex)
@@ -62,26 +62,39 @@ namespace RepositoryLayer.DatabaseMigration.ToDatabases
 		{
 			try
 			{
-				foreach (var row in tableData)
-				{
-					var escapedTableName = $"`{tableName}`";
-					var columns = string.Join(", ", row.Keys.Select(key => $"`{key}`"));
-					var parameters = string.Join(", ", row.Keys.Select((_, index) => $"@p{index}"));
-					string query = $"INSERT INTO {escapedTableName} ({columns}) VALUES ({parameters})";
+                var escapedTableName = $"`{tableName}`";
+                var columns = string.Join(", ", tableData.First().Keys.Select(key => $"`{key}`"));
+                var valuesList = new List<string>();
+                var parameters = new List<MySqlParameter>();
 
-					OpenCommand(query);
-					int paramIndex = 0;
-					foreach (var keyValue in row)
-					{
-						SqlCommand!.Parameters.Add(new MySqlParameter($"@p{paramIndex}", keyValue.Value ?? DBNull.Value));
-						paramIndex++;
-					}
+                int paramCounter = 0; // Ensure unique parameter names
 
-					await SqlCommand!.ExecuteNonQueryAsync();
-				}
+                foreach (var row in tableData)
+                {
+                    var paramNames = new List<string>();
 
-			}
-			catch (Exception ex)
+                    foreach (var keyValue in row)
+                    {
+                        string paramName = $"@p{paramCounter}";
+                        paramNames.Add(paramName);
+                        parameters.Add(new MySqlParameter(paramName, keyValue.Value ?? DBNull.Value));
+                        paramCounter++; // Increment after adding the parameter
+                    }
+
+                    valuesList.Add($"({string.Join(", ", paramNames)})");
+                }
+
+                // Build the final query with all the rows in one insert statement
+                string query = $" INSERT INTO {escapedTableName} ({columns}) VALUES {string.Join(", ", valuesList)}";
+				SqlCommand.CommandText += query;
+                // Execute the query in one go
+                //OpenCommand(query);
+                SqlCommand!.Parameters.AddRange(parameters.ToArray());
+                await SqlCommand!.ExecuteNonQueryAsync();
+
+
+            }
+            catch (Exception ex)
 			{
 				throw;
 			}

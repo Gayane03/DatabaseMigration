@@ -62,26 +62,27 @@ namespace RepositoryLayer.DatabaseMigration.ToDatabases
         public async Task InsertTableData(string tableName, IEnumerable<Dictionary<string, object>> tableData)
         {
             try
-            {             
+            {
+                var escapedTableName = $"\"{tableName}\"";
+                var columns = string.Join(", ", tableData.First().Keys.Select(key => $"\"{key}\""));
+
+                var valuesList = new List<string>(); // Collects value placeholders
+                var parameters = new List<NpgsqlParameter>(); // Collects parameters
+                int paramIndex = 0;
+
                 foreach (var row in tableData)
                 {
-                    var escapedTableName = $"\"{tableName}\"";
+                    var paramNames = row.Keys.Select(_ => $"@p{paramIndex++}").ToList();
+                    valuesList.Add($"({string.Join(", ", paramNames)})");
 
-                    var columns = string.Join(", ", row.Keys.Select(key => $"\"{key}\""));
-
-                    var parameters = string.Join(", ", row.Keys.Select((_, index) => $"@p{index}"));
-
-                    string query = $"INSERT INTO {escapedTableName} ({columns}) VALUES ({parameters})";
-
-                    OpenCommand(query);
-                    int paramIndex = 0;
-                    foreach (var keyValue in row)
-                    {
-                        SqlCommand!.Parameters.Add(new NpgsqlParameter($"@p{paramIndex}", keyValue.Value ?? DBNull.Value));
-                        paramIndex++;
-                    }
-                    await SqlCommand!.ExecuteNonQueryAsync();
+                    parameters.AddRange(row.Values.Select((value, i) => new NpgsqlParameter(paramNames[i], value ?? DBNull.Value)));
                 }
+
+                string query = $"INSERT INTO {escapedTableName} ({columns}) VALUES {string.Join(", ", valuesList)}";
+
+                using var command = new NpgsqlCommand(query, (NpgsqlConnection)SqlConnection);
+                command.Parameters.AddRange(parameters.ToArray());
+                await command.ExecuteNonQueryAsync(); // 🚀 Executes everything in one call
             }
             catch (Exception ex)
             {

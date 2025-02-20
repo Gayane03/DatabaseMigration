@@ -15,7 +15,9 @@ namespace RepositoryLayer.DatabaseMigration.FromDatabases
             var columnsInfo = new List<ColumnInfo>();
             try
             {
-                await OpenConnectionAsync();                
+                await OpenConnectionAsync();
+
+               
                 var query = BaseRepositoryHelper.GenerateTableSchemaQuery(tableName, serverType); 
 
                 OpenCommand(query);
@@ -55,7 +57,7 @@ namespace RepositoryLayer.DatabaseMigration.FromDatabases
             {
                 await OpenConnectionAsync();
                
-                string query = $"SELECT TOP 1 * FROM [{tableName}]";
+                string query = $"SELECT * FROM [{tableName}]";
                 OpenCommand(query);
 
                 await OpenDataReaderAsync(); 

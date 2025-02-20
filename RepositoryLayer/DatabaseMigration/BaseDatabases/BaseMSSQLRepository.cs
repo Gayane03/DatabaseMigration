@@ -11,14 +11,15 @@ namespace RepositoryLayer.DatabaseMigration.BaseDatabases
 		{
 			if (SqlConnection == null || SqlConnection.State != ConnectionState.Open)
 			{
-				SqlConnection = new SqlConnection(connectionPath);
-				await SqlConnection.OpenAsync();
+				SqlConnection = new SqlConnection(connectionPath);             
+                await SqlConnection.OpenAsync();
 			}
 		}
 
 		public override void OpenCommand(string commandText)
 		{
 			SqlCommand = new SqlCommand(commandText, (SqlConnection)SqlConnection);
-		}
+            SqlCommand!.CommandTimeout = 300;
+        }
 	}
 }

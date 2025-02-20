@@ -63,25 +63,35 @@ namespace RepositoryLayer.DatabaseMigration.ToDatabases
 			try
 			{
 
-				foreach (var row in tableData)
-				{
-					var escapedTableName = $"[{tableName}]";
-					var columns = string.Join(", ", row.Keys.Select(key => $"[{key}]"));
-					var parameters = string.Join(", ", row.Keys.Select((_, index) => $"@p{index}"));
-					string query = $"INSERT INTO {escapedTableName} ({columns}) VALUES ({parameters})";
+                var escapedTableName = $"[{tableName}]";
+                var columns = string.Join(", ", tableData.First().Keys.Select(key => $"[{key}]"));
+                var valuesList = new List<string>();
+                var parameters = new List<SqlParameter>();
+                int paramIndex = 0;
 
-					OpenCommand(query);
-					int paramIndex = 0;
-					foreach (var keyValue in row)
-					{
-						SqlCommand!.Parameters.Add(new SqlParameter($"@p{paramIndex}", keyValue.Value ?? DBNull.Value));
-						paramIndex++;
-					}
+                foreach (var row in tableData)
+                {
+                    // Collect parameter names for this row
+                    var paramNames = row.Keys.Select(_ => $"@p{paramIndex++}").ToList();
+                    valuesList.Add($"({string.Join(", ", paramNames)})");
 
-					await SqlCommand!.ExecuteNonQueryAsync();
-				}
-			}
-			catch (Exception ex)
+                    // Add the parameters for this row
+                    foreach (var keyValue in row)
+                    {
+                        parameters.Add(new SqlParameter($"@p{paramIndex - 1}", keyValue.Value ?? DBNull.Value));
+                    }
+                }
+
+                // Build the final query with all the rows in one insert statement
+                string query = $"INSERT INTO {escapedTableName} ({columns}) VALUES {string.Join(", ", valuesList)}";
+
+                // Execute the query in one go
+                OpenCommand(query);
+                SqlCommand!.Parameters.AddRange(parameters.ToArray());
+                await SqlCommand!.ExecuteNonQueryAsync();
+
+            }
+            catch (Exception ex)
 			{
 				throw;
 			}

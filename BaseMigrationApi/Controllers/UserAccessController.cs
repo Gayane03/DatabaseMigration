@@ -15,9 +15,15 @@ namespace BaseMigrationApi.Controllers
 		private readonly IJwtTokenHandlerService jwtTokenHandlerService;
 		public UserAccessController(IJwtTokenHandlerService jwtTokenHandlerService)
 		{
-
 		   this.jwtTokenHandlerService = jwtTokenHandlerService;	
 		}
+
+
+		[HttpGet("validateToken")]
+		public async Task<IActionResult> ValidateToken()
+		{
+			return Ok(true);
+        }
 	
 		[HttpGet("test")]
 		public bool Test(string token)

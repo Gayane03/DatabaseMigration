@@ -1,4 +1,7 @@
-﻿@* Required *@
+﻿@inject NavigationManager navigationManager;
+
+
+@* Required *@
 <MudThemeProvider />
 <MudPopoverProvider />
 
@@ -20,3 +23,10 @@
         </LayoutView>
     </NotFound>
 </Router>
+
+@code {
+    protected override void OnInitialized()
+    {
+        navigationManager.NavigateTo(Route.Registration);
+    }
+}

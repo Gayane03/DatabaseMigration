@@ -37,7 +37,30 @@ namespace BaseMigrationUI.Pages
 
 		protected override async Task OnInitializedAsync()
 		{
-			await base.OnInitializedAsync();
+
+            await base.OnInitializedAsync();
+
+            var accessToken = await localStorageHelper.GetToken(TokenStorageName.UserAccess);
+
+			if(!string.IsNullOrEmpty(accessToken))
+			{
+				try
+				{
+                    var response = await apiController.ValidateToken(accessToken);
+                    var isValid = await responseMessageUtile.HandleResponse<bool>(response);
+
+                    if (isValid)
+                    {
+						navigationManager.NavigateTo(Route.BaseMigration);
+                    }
+                }
+				catch (Exception)
+				{
+					navigationManager.NavigateTo(Route.Registration);
+				}				
+            }
+
+		
 		}
 
 		private async Task OnRegister()

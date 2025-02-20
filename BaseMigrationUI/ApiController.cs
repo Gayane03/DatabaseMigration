@@ -1,5 +1,4 @@
-﻿using BaseMigrationUI.Models;
-using SharedLibrary.RequestModels;
+﻿using SharedLibrary.RequestModels;
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
 
@@ -30,15 +29,22 @@ namespace BaseMigrationUI
 			return await httpClient.PostAsJsonAsync("User/login", loginRequest);
 		}
 
-		public async Task<HttpResponseMessage?> GetDatabaseTables(ServerRequest serverRequest)
+		public async Task<HttpResponseMessage?> GetDatabaseTables(ServerRequest serverRequest, string token)
 		{
+            httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
             return await httpClient.PostAsJsonAsync("Migration/getTables", serverRequest);
         }
 
-		public async Task<HttpResponseMessage?> MigrateTables(MigrationRequest migrationRequest)
+		public async Task<HttpResponseMessage?> MigrateTables(MigrationRequest migrationRequest, string token)
 		{
-			return await httpClient.PostAsJsonAsync("Migration/migrateTables", migrationRequest);
+            httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+            return await httpClient.PostAsJsonAsync("Migration/migrateTables", migrationRequest);
 		}
 
-	}
+        public async Task<HttpResponseMessage?> ValidateToken(string token)
+        {
+            httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+            return await httpClient.GetAsync("UserAccess/validateToken");
+        }
+    }
 }

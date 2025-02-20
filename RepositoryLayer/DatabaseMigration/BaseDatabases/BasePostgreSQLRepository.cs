@@ -18,7 +18,8 @@ namespace RepositoryLayer.DatabaseMigration.BaseDatabases
 
         public override void OpenCommand(string commandText)
         {
-            SqlCommand = new NpgsqlCommand(commandText, (NpgsqlConnection)SqlConnection);          
+            SqlCommand = new NpgsqlCommand(commandText, (NpgsqlConnection)SqlConnection);
+            SqlCommand!.CommandTimeout = 300;
         }
     }
 }

@@ -1,5 +1,8 @@
-﻿using BusinessLayer.Services;
+﻿using BaseMigrationApi.Helpers;
+using BusinessLayer.Helper;
+using BusinessLayer.Services;
 using BusinessLayer.Services.DatabaseMigrationHelper;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using SharedLibrary.RequestModels;
 
@@ -7,6 +10,7 @@ namespace BaseMigrationApi.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
+    [Authorize(AuthenticationSchemes = TokenSchemeType.UserAccess)]
     public class MigrationController : ControllerBase
     {
         private readonly IDataService dataService;
