@@ -8,6 +8,9 @@ namespace BaseMigrationUI.Pages
 {
 	public partial class RegistrationPage
 	{
+		[Inject] 
+		private ISnackbar Snackbar { get; set; }
+
 		[Inject]
 		private ApiController? apiController { get; set; }
 
@@ -34,33 +37,35 @@ namespace BaseMigrationUI.Pages
 		private LoginRequest loginRequest = new();
 		private LoginResponse? loginResponse;
 
-
 		protected override async Task OnInitializedAsync()
 		{
 
             await base.OnInitializedAsync();
+			Snackbar.Configuration.PositionClass = Defaults.Classes.Position.TopCenter;
+			await AccessToken();
+		}
 
-            var accessToken = await localStorageHelper.GetToken(TokenStorageName.UserAccess);
+		private  async Task AccessToken()
+		{
+			var accessToken = await localStorageHelper.GetToken(TokenStorageName.UserAccess);
 
-			if(!string.IsNullOrEmpty(accessToken))
+			if (!string.IsNullOrEmpty(accessToken))
 			{
 				try
 				{
-                    var response = await apiController.ValidateToken(accessToken);
-                    var isValid = await responseMessageUtile.HandleResponse<bool>(response);
+					var response = await apiController.ValidateToken(accessToken);
+					var isValid = await responseMessageUtile.HandleResponse<bool>(response);
 
-                    if (isValid)
-                    {
+					if (isValid)
+					{
 						navigationManager.NavigateTo(Route.BaseMigration);
-                    }
-                }
+					}
+				}
 				catch (Exception)
 				{
 					navigationManager.NavigateTo(Route.Registration);
-				}				
-            }
-
-		
+				}
+			}
 		}
 
 		private async Task OnRegister()
@@ -95,12 +100,15 @@ namespace BaseMigrationUI.Pages
 					navigationManager!.NavigateTo(Route.Verification);
 				}
 			}
-            catch (Exception ex)
-            {
-				navigationManager?.NavigateTo($"/{Route.NotFound}?error={Uri.EscapeDataString(ex.Message)}");
-				//navigationManager?.NavigateTo(Route.NotFound);
-            }
-        }
+			catch (SystemException ex)
+			{
+				Snackbar.Add(ex.Message, Severity.Error);
+			}
+			catch (Exception ex)
+			{
+				Snackbar.Add("Please contact with support team", Severity.Error);
+			}
+		}
 
 		private async Task OnLogin()
 		{
@@ -125,11 +133,13 @@ namespace BaseMigrationUI.Pages
 					navigationManager!.NavigateTo(Route.BaseMigration);
 				}
 			}
-            catch (Exception ex)
+            catch (SystemException ex)
             {
-				navigationManager?.NavigateTo(Route.NotFound);
-
-				//navigationManager?.NavigateTo($"/{Route.NotFound}?error={Uri.EscapeDataString(ex.Message)}");
+				Snackbar.Add(ex.Message, Severity.Error);
+			}
+			catch (Exception ex)
+			{
+				Snackbar.Add("Please contact with support team", Severity.Error);
 			}
 		}
 

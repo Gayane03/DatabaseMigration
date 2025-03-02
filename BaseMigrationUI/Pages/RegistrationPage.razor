@@ -5,7 +5,6 @@
 @inject RegistrationRequestValidator registrationRequestValidator;
 @inject LoginRequestValidator loginRequestValidator;
 
-
 @if (isRegistrationProcess)
 {
 	<MudForm @ref="formRegistration" Validation="registrationRequestValidator.ValidateValue" Model="@registrationModel">
@@ -54,13 +53,15 @@
 						  @bind-Value="registrationModel.Password"
 						  Label="Password"
 						  For="@(() => registrationModel.Password)"
-						  Immediate="true" />
+						  Immediate="true"
+						 InputType="InputType.Password"/>
 
 			<MudTextField T="string"
 						  @bind-Value="registrationModel.RepeatPassword"
 						  Label="RepeatPassword"
 						  For="@(() => registrationModel.RepeatPassword)"
-						  Immediate="true" />
+						  Immediate="true"
+						  InputType="InputType.Password" />
 			
 
 			<MudCardActions Class="pl-0">
@@ -104,7 +105,8 @@ else
 							  @bind-Value="loginRequest.Password"
 							  Label="Password"
 							  For="@(() => loginRequest.Password)"
-							  Immediate="true" />
+							  Immediate="true"
+							  InputType="InputType.Password" />
 			</MudItem>
 
 			<MudCardActions Class="pl-0">

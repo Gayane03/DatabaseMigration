@@ -7,6 +7,7 @@
 @inject ResponseMessageUtile responseMessageUtile;
 @inject NavigationManager navigationManager;
 @inject LocalStorageHelper localStorageHelper;
+@inject ISnackbar Snackbar;
 
 <MudForm @ref="form" Validation="verifyEmailRequestValidator.ValidateValue" Model="@verifyEmailRequest">
 	<MudCardContent>
@@ -71,11 +72,13 @@
 				navigationManager.NavigateTo(Route.BaseMigration);
 			}
 		}
+		catch (SystemException ex)
+		{
+			Snackbar.Add(ex.Message, MudBlazor.Severity.Error);
+		}
 		catch (Exception ex)
 		{
-			// navigationManager.NavigateTo($"/{Route.NotFound}?error={Uri.EscapeDataString(ex.Message)}");
-			navigationManager?.NavigateTo(Route.NotFound);
-
+			Snackbar.Add("Please contact with support team", MudBlazor.Severity.Error);
 		}
 	}
 
