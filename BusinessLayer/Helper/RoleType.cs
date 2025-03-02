@@ -8,6 +8,6 @@
 	public enum RoleType
 	{
 		Admin = 1,
-		Developer = 2
+		User = 2
 	}
 }

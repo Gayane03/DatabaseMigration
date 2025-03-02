@@ -2,6 +2,7 @@
 using BaseMigrationApi.Extensions;
 using BusinessLayer.Helper;
 using BusinessLayer.Mapping;
+using Microsoft.AspNetCore.Identity;
 
 namespace BaseMigrationApi.Helper
 {
@@ -20,8 +21,15 @@ namespace BaseMigrationApi.Helper
 
 			builder.Services.AddDependencies();
 
-			builder.Services.AddAutoMapper(typeof(MappingProfile).Assembly);
+			builder.Services.Configure<PasswordHasherOptions>(options =>
+			{
+				options.IterationCount = 12000; // Increase iterations
+				//options.HashAlgorithm = PasswordHashAlgorithm.SHA256; //example
+				//options.MemoryReductionFactor = true; //for pbkdf2, can reduce memory consumption.
+			});
 
+			builder.Services.AddAutoMapper(typeof(MappingProfile).Assembly);
+			
 			builder.AddConfigurations();
 
 			builder.AddLocalAuthentications();
