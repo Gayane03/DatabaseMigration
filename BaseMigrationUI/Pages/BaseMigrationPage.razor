@@ -6,89 +6,231 @@
 @inject ResponseMessageUtile responseMessageUtile;
 @inject LocalStorageHelper localStorageHelper;
 @inject ISnackbar Snackbar;
-@layout MainLayout;
+@layout MigrationLayout;
 
 <PageTitle>Migration</PageTitle>
 
+<style>
+	.migration-container {
+		padding: 30px;
+		background-color: #f6f6ff;
+		height: 100%;
+	}
+
+	.migration-header {
+		margin-bottom: 20px;
+		color: #343a40;
+		font-weight: 600;
+		margin-left: 4px;
+	}
+
+	.migration-paper {
+		padding: 25px;
+		border-radius: 8px;
+		box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+		background-color: white;
+	}
+
+	.migration-grid {
+		margin-bottom: 20px;
+	}
+
+	/* .migration-button {
+		margin-top: 10px;
+	}
+ */
+	.table-selection-header {
+		margin-top: 15px;
+		margin-bottom: 10px;
+		color: #007bff;
+		font-weight: 500;
+	}
+
+	.logout-button {
+		margin-top: 30px;
+		text-align: right;
+	}
+
+	.mud-select {
+		margin-bottom: 15px;
+	}
+
+	.mud-text-field {
+		margin-bottom: 15px;
+	}
+</style>
+
 @if (migrationRequest is not null)
 {
-		<MudContainer>
-			<MudText Typo="Typo.h5">Migration Configuration</MudText>
+	<MudContainer Class="migration-container">
+		<MudText Typo="Typo.h5" Class="migration-header">Migration Configuration</MudText>
+			<MudGrid Class="migration-grid">
+				<MudItem xs="12" md="6">
+					<MudGrid Spacing="2">
+						<MudItem xs="12">
+							<MudTextField T="string" Label="From Server Connection" @bind-Value="migrationRequest.FromDatabaseRequest.DatabaseConnection" FullWidth Class="mud-text-field" />
+						</MudItem>
 
-			<MudPaper Class="pa-4 mt-2 mb-4" Elevation="2">
-				<MudGrid>
+						<MudItem xs="12">
+							<MudSelect T="ServerType" Label="From Server Type" @bind-Value="migrationRequest.FromDatabaseRequest.ServerType" FullWidth Class="mud-select">
+								<MudSelectItem T="ServerType" Value="ServerType.MSSQL">MSSQL Server</MudSelectItem>
+								<MudSelectItem T="ServerType" Value="ServerType.MySQL">MySQL</MudSelectItem>
+								<MudSelectItem T="ServerType" Value="ServerType.PostgreSQL">PostgreSQL</MudSelectItem>
+							</MudSelect>
+						</MudItem>
+
+						@if (tablesWithoutRelationOtherTables == null || !tablesWithoutRelationOtherTables.Any())
+						{
+							<MudItem xs="12" Class="migration-button">
+								<MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="FetchTables">Get Tables</MudButton>
+							</MudItem>
+						}
+						else
+						{
+							<MudItem xs="12">
+								<MudCheckBox T="bool"
+											 Label="Select all tables"
+											 Color="Color.Primary"
+											 Value="selectAllTables"
+											 ValueChanged="(value) => OnSelectAll(value)"
+											 Class="my-n5"/>
+
+							</MudItem>
+							<MudItem xs="12">
+								<MudGrid Spacing="1">
+									<MudItem>
+										<MudText Typo="Typo.h6"
+												 Color="Color.Primary"
+												 Class="table-selection-header">Select strongly tables</MudText>
+									</MudItem>
+									<MudItem>
+										<MudCheckBox T="bool"
+													 Label="Select all"
+													 Color="Color.Primary"
+													 Value="selectAllStrongTables"
+													 ValueChanged="(value) => SelectAllStronglyTables(value)"
+													 Class="pt-2 pb-2" />
+									</MudItem>
+								</MudGrid>
+								@foreach (var table in tablesWithoutRelationOtherTables)
+								{
+									<MudCheckBox T="bool" Label="@table.TableName" @bind-Value="table.IsSelected" />
+								}
+							</MudItem>
+
+
+							if (tablesWithoutRelationOtherTables.All(tab => tab.IsSelected))
+							{
+								<MudItem xs="12">
+									<MudGrid Spacing="1">
+										<MudItem>
+											<MudText Typo="Typo.h6" Color="Color.Primary" Class="table-selection-header">Select weakly tables</MudText>
+										</MudItem>
+										<MudItem>
+											<MudCheckBox T="bool"
+														 Color="Color.Primary"
+														 Label="Select all"
+														 Value="selectAllWeaklyTables"
+														 ValueChanged="(value) => OnSelectAllWeakly(value)"
+														 Class="pt-2 pb-2" />
+										</MudItem>
+									</MudGrid>
+									@foreach (var table in tablesWithRelatedTables)
+									{
+										<MudCheckBox T="bool" Label="@table.TableName" @bind-Value="table.IsSelected" />
+									}
+								</MudItem>
+
+							}
+
+						}
+
+
+
+
+					</MudGrid>
+				</MudItem>
+
+			
 					<MudItem xs="12" md="6">
 						<MudGrid Spacing="2">
 							<MudItem xs="12">
-								<MudTextField T="string" Label="From Server Connection" @bind-Value="migrationRequest.FromDatabaseRequest.DatabaseConnection" FullWidth />
+								<MudTextField T="string" Label="To Server Connection" @bind-Value="migrationRequest.ToDatabaseRequest.DatabaseConnection" FullWidth Class="mud-text-field" />
 							</MudItem>
 
 							<MudItem xs="12">
-								<MudSelect T="ServerType" Label="From Server Type" @bind-Value="migrationRequest.FromDatabaseRequest.ServerType" FullWidth>
+								<MudSelect T="ServerType" Label="To Server Type" @bind-Value="migrationRequest.ToDatabaseRequest.ServerType" FullWidth Class="mud-select">
 									<MudSelectItem T="ServerType" Value="ServerType.MSSQL">MSSQL Server</MudSelectItem>
 									<MudSelectItem T="ServerType" Value="ServerType.MySQL">MySQL</MudSelectItem>
 									<MudSelectItem T="ServerType" Value="ServerType.PostgreSQL">PostgreSQL</MudSelectItem>
 								</MudSelect>
 							</MudItem>
-
-						@if (tables == null || !tables.Any())
-						{
-									<MudItem xs="12" Class="mt-4">
-										<MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="FetchTables">Get Tables</MudButton>
-									</MudItem>
-						}
-						else
-						{
-									<MudItem xs="12" Class="mt-2">
-										<MudText Typo="Typo.h6" Color="Color.Primary">Select Tables to Migrate</MudText>
-								@foreach (var table in tables)
-								{
-												<MudCheckBox T="bool" Label="@table.TableName" @bind-Value="table.IsSelected" />
-								}
-									</MudItem>
-						}
+					@if (AnyTablesSelected || AnyWeaklyTablesSelected)
+					{
+						<MudItem xs="12" Class="migration-button">
+							<MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="StartMigration">Start Migration</MudButton>
+						</MudItem>
+					}
 						</MudGrid>
 					</MudItem>
-
-				@if (AnyTablesSelected)
-				{
-							<MudItem xs="12" md="6">
-								<MudGrid Spacing="2">
-									<MudItem xs="12">
-										<MudTextField T="string" Label="To Server Connection" @bind-Value="migrationRequest.ToDatabaseRequest.DatabaseConnection" FullWidth />
-									</MudItem>
-
-									<MudItem xs="12">
-										<MudSelect T="ServerType" Label="To Server Type" @bind-Value="migrationRequest.ToDatabaseRequest.ServerType" FullWidth>
-											<MudSelectItem T="ServerType" Value="ServerType.MSSQL">MSSQL Server</MudSelectItem>
-											<MudSelectItem T="ServerType" Value="ServerType.MySQL">MySQL</MudSelectItem>
-											<MudSelectItem T="ServerType" Value="ServerType.PostgreSQL">PostgreSQL</MudSelectItem>
-										</MudSelect>
-									</MudItem>
-
-									<MudItem xs="12" Class="mt-4">
-										<MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="StartMigration">Start Migration</MudButton>
-									</MudItem>
-								</MudGrid>
-							</MudItem>
-				}
-				</MudGrid>
-			</MudPaper>
-
-			<MudGrid Justify="Justify.FlexEnd">
-				<MudItem Class="my-4" Style="text-align: right;">
-					<MudButton Variant="Variant.Filled" Color="Color.Default" OnClick="Logout">LOGOUT</MudButton>
-				</MudItem>
-			</MudGrid>
-
-		</MudContainer>
+		
+			</MudGrid>	
+	</MudContainer>
+}
 
 
-	@code {
+
+@code {
 	private bool? isOkayMigrated = false;
-	private List<MigratedTableRequest> databaseTables = new();
-	private List<TableRequest> tables = new();
+	private List<MigratedTableResponse> databaseTables = new();
+	private List<TableCurrentMigration> tablesWithoutRelationOtherTables = new();
+	private List<TableCurrentMigration> tablesWithRelatedTables = new();
 	private MigrationRequest migrationRequest;
+
+	private bool showSuccessMessage = false;
+
+	private bool allProcessesCompletedSuccessfully = false;
+	private bool selectAllStrongTables = false;
+
+	private async Task SelectAllStronglyTables(bool value)
+	{
+		selectAllStrongTables = value;
+		tablesWithoutRelationOtherTables = tablesWithoutRelationOtherTables.Select(t =>
+		{
+			t.IsSelected = selectAllStrongTables;
+			return t;
+		}).ToList();
+
+		if (!value)
+		{
+			await OnSelectAllWeakly(value);
+			selectAllTables = false;
+		}
+
+		StateHasChanged();
+	}
+
+	private bool selectAllWeaklyTables = false;
+	private async Task OnSelectAllWeakly(bool value)
+	{
+		selectAllWeaklyTables = value;
+		tablesWithRelatedTables = tablesWithRelatedTables.Select(t =>
+		{
+			t.IsSelected = value;
+			return t;
+		}).ToList();
+
+		StateHasChanged();
+	}
+
+	private bool selectAllTables = false;
+
+	private async Task OnSelectAll(bool value)
+	{
+		selectAllTables = value;
+		await SelectAllStronglyTables(selectAllTables);
+		await OnSelectAllWeakly(selectAllTables);
+	}
 
 	string? token = null;
 
@@ -96,11 +238,12 @@
 	{
 
 		token = await localStorageHelper.GetToken(TokenStorageName.UserAccess);
+		Snackbar.Configuration.PositionClass = Defaults.Classes.Position.TopCenter;
 
 		migrationRequest ??= new MigrationRequest
 			{
 				FromDatabaseRequest = new ServerRequest { ServerType = ServerType.MSSQL },
-				ToDatabaseRequest = new ServerRequest { ServerType = ServerType.MSSQL },
+				ToDatabaseRequest = new ServerRequest { ServerType = ServerType.PostgreSQL },
 				MigratedTablesInfoRequest = new List<MigratedTableRequest>()
 			};
 	}
@@ -109,16 +252,24 @@
 	{
 		try
 		{
-			tables.Clear();
+			tablesWithoutRelationOtherTables.Clear();
+			tablesWithRelatedTables.Clear();
 
 			var response = await apiController.GetDatabaseTables(migrationRequest.FromDatabaseRequest, token);
-			databaseTables = await responseMessageUtile!.HandleResponse<List<MigratedTableRequest>>(response);
+			databaseTables = await responseMessageUtile!.HandleResponse<List<MigratedTableResponse>>(response);
 
 			if (databaseTables != null)
 			{
-				tables = databaseTables.Select(table => new TableRequest
+				tablesWithRelatedTables = databaseTables.Where(table => table.IsContainFK).Select(table => new TableCurrentMigration
 					{
-						TableName = table.TableName,
+						TableName = table.Name,
+						IsContainFK = table.IsContainFK
+					}).ToList();
+
+
+				tablesWithoutRelationOtherTables = databaseTables.Where(table => !table.IsContainFK).Select(table => new TableCurrentMigration
+					{
+						TableName = table.Name,
 						IsContainFK = table.IsContainFK
 					}).ToList();
 			}
@@ -133,11 +284,13 @@
 		}
 	}
 
-	private bool AnyTablesSelected => tables != null && tables.Any(t => t.IsSelected);
+	private bool AnyTablesSelected => tablesWithoutRelationOtherTables != null && tablesWithoutRelationOtherTables.Any(t => t.IsSelected);
+	private bool AnyWeaklyTablesSelected => tablesWithRelatedTables != null && tablesWithRelatedTables.Any(t => t.IsSelected);
 
-	private void TableSelectionChanged(TableRequest table, bool newValue)
+	private async Task TableSelectionChanged(TableCurrentMigration table, bool newValue)
 	{
-		tables = tables.Select(t =>
+
+		tablesWithoutRelationOtherTables = tablesWithoutRelationOtherTables.Select(t =>
 		{
 			if (t == table)
 			{
@@ -145,13 +298,32 @@
 			}
 			return t;
 		}).ToList();
+
+		StateHasChanged();
+	}
+
+	private async void TableSelectionWithRelatipnChanged(TableCurrentMigration table, bool newValue)
+	{
+		tablesWithRelatedTables = tablesWithRelatedTables.Select(t =>
+		{
+			if (t == table)
+			{
+				t.IsSelected = newValue;
+			}
+
+			return t;
+		}).ToList();
+
+		StateHasChanged();
 	}
 
 	private async Task StartMigration()
 	{
 		try
 		{
-			var selectedTables = tables.Where(t => t.IsSelected).ToList();
+			var selectedTables = tablesWithoutRelationOtherTables.Where(t => t.IsSelected).ToList();
+			selectedTables.AddRange(tablesWithRelatedTables.Where(t => t.IsSelected).ToList());
+
 
 			if (!selectedTables.Any())
 			{
@@ -162,7 +334,7 @@
 			migrationRequest.MigratedTablesInfoRequest.Clear();
 			foreach (var table in selectedTables)
 			{
-				migrationRequest.MigratedTablesInfoRequest.Add(new MigratedTableRequest { TableName = table.TableName, IsContainFK = table.IsContainFK });
+				migrationRequest.MigratedTablesInfoRequest.Add(new MigratedTableRequest { Name = table.TableName, IsContainFK = table.IsContainFK });
 			}
 
 			var response = await apiController.MigrateTables(migrationRequest, token);
@@ -170,10 +342,14 @@
 
 			if (isOkayMigrated.HasValue && isOkayMigrated.Value)
 			{
-				tables = new();
+				// tablesWithoutRelationOtherTables = new();
+				// tablesWithRelatedTables = new();
+				navigationManager.NavigateTo("/success");
+
 			}
 			else
 			{
+
 				// Snackbar.Add("Migration failed.", Severity.Error);
 			}
 		}
@@ -187,19 +363,10 @@
 		}
 	}
 
-	private async Task Logout()
-	{
-		await localStorageHelper.RemoveToken(TokenStorageName.EmailVerification);
-		await localStorageHelper.RemoveToken(TokenStorageName.UserAccess);
-
-		navigationManager.NavigateTo(Route.Registration);
-	}
-
-	private class TableRequest
+	private class TableCurrentMigration
 	{
 		public string TableName { get; set; }
 		public bool IsContainFK { get; set; }
 		public bool IsSelected { get; set; } = false;
 	}
-}
 }

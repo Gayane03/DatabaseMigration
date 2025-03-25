@@ -13,29 +13,31 @@ namespace BusinessLayer.Services
                 this.migrationRepository = migrationRepository;
         }
 
-        public async Task<Result<IEnumerable<MigratedTableRequest>>> GetTables(ServerRequest databaseRequest)
+        public async Task<Result<IEnumerable<MigratedTableResponse>>> GetTables(ServerRequest databaseRequest)
         {
             try
             {
-                var tables = await migrationRepository.GetTables(databaseRequest);
+                var tablesWithReferencedTables = await migrationRepository.GetTableRelationships(databaseRequest);
 
-                var migratedTableRequest = new List<MigratedTableRequest>();
+				if (tablesWithReferencedTables == default(IEnumerable<string>) || !tablesWithReferencedTables.Any())
+				{
+					return Result<IEnumerable<MigratedTableResponse>>.Failure(Message.TableGettingProblem);
+				}
 
-                foreach (var table in tables)
+
+				var migratedTableRequest = new List<MigratedTableResponse>();
+
+                foreach (var table in tablesWithReferencedTables)
                 {
-                    migratedTableRequest.Add(new MigratedTableRequest() { TableName = table ,IsContainFK = false});
+                    var isContainFK = table.Value?.Any() ?? false;
+                    migratedTableRequest.Add(new MigratedTableResponse() { Name = table.Key, IsContainFK = isContainFK , ReferencedTableNames = table.Value });
                 }
 
-                if (tables == default(IEnumerable<string>) || !tables.Any()) 
-                {
-                    return Result<IEnumerable<MigratedTableRequest>>.Failure(Message.TableGettingProblem);
-                }
-
-                return Result<IEnumerable<MigratedTableRequest>>.Success(migratedTableRequest);
+				return Result<IEnumerable<MigratedTableResponse>>.Success(migratedTableRequest);
             }
             catch (Exception ex)
             {
-                return Result<IEnumerable<MigratedTableRequest>>.Failure(Message.SystemError);
+                return Result<IEnumerable<MigratedTableResponse>>.Failure(Message.SystemError);
             }
         }
     }

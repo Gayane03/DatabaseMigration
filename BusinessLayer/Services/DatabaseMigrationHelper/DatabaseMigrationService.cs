@@ -20,6 +20,16 @@ namespace BusinessLayer.Services.DatabaseMigrationHelper
 
 				await Task.WhenAll(tasks);
 
+
+				var migratedTablesWithFK = migratedTablesRequest.MigratedTablesInfoRequest.Where(table => table.IsContainFK);
+
+				var tasksForWeaklyTables = migratedTablesWithFK
+					.Select(migratedTable => Task.Run(() => MigrateTableAsync(migratedTablesRequest.FromDatabaseRequest,
+																			  migratedTablesRequest.ToDatabaseRequest,
+																			  migratedTable))).ToArray();
+
+				await Task.WhenAll(tasksForWeaklyTables);
+
 				return Result<bool?>.Success(true);
 			}
 			catch (Exception ex)
@@ -38,7 +48,7 @@ namespace BusinessLayer.Services.DatabaseMigrationHelper
 				var toServerType = toServerRequest.ServerType;
 				var toConnectionPath = toServerRequest.DatabaseConnection;
 
-				var migratedTableName = migratedTable.TableName;
+				var migratedTableName = migratedTable.Name;
 
 				var fromDatabaseConnector = DatabaseMigrationHelperFactory.GetFromDatabaseConnector(fromServerType,fromConnectionPath);
 

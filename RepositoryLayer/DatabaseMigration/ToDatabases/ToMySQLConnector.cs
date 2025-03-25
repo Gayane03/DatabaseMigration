@@ -25,7 +25,7 @@ namespace RepositoryLayer.DatabaseMigration.ToDatabases
 
 				foreach (var column in columnsInfo)
 				{
-					createTableQuery.Append($"`{column.Name}` {ColumnTypeGenerator.GetColumnDatatType(fromServerType, ServerType.MySQL, column?.DataType)} ");
+					createTableQuery.Append($"`{column.Name}` {ColumnTypeGenerator.GetColumnDataType(fromServerType, ServerType.MySQL, column?.DataType)} ");
 
 					if (!column.IsNullable)
 					{

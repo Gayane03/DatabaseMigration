@@ -55,7 +55,7 @@ namespace BaseMigrationApi.Helper
 			}
 
 
-            app.UseCors("AllowBlazorClient");//blazori jamanak****
+            app.UseCors("AllowBlazorClient"); //blazori jamanak****
 
 			app.UseHttpsRedirection();
 

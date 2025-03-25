@@ -4,7 +4,7 @@ namespace RepositoryLayer
 {
     public interface IMigrationRepository
     {
-        Task<IEnumerable<string>> GetTables(ServerRequest databaseRequest);
-        //Task<bool> TransferTable(TransferTableRequest transferTableRequest);
-    }
+		Task<Dictionary<string, List<string>?>> GetTableRelationships(ServerRequest databaseRequest);
+		//Task<bool> TransferTable(TransferTableRequest transferTableRequest);
+	}
 }

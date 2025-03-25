@@ -8,7 +8,7 @@ namespace BaseMigrationUI.Pages
 {
 	public partial class RegistrationPage
 	{
-		[Inject] 
+		[Inject]
 		private ISnackbar Snackbar { get; set; }
 
 		[Inject]
@@ -40,12 +40,12 @@ namespace BaseMigrationUI.Pages
 		protected override async Task OnInitializedAsync()
 		{
 
-            await base.OnInitializedAsync();
+			await base.OnInitializedAsync();
 			Snackbar.Configuration.PositionClass = Defaults.Classes.Position.TopCenter;
 			await AccessToken();
 		}
 
-		private  async Task AccessToken()
+		private async Task AccessToken()
 		{
 			var accessToken = await localStorageHelper.GetToken(TokenStorageName.UserAccess);
 
@@ -92,10 +92,10 @@ namespace BaseMigrationUI.Pages
 					string? token = emailVerificationTokenResponse?.VerificationToken;
 					if (string.IsNullOrEmpty(token))
 					{
-                        throw new Exception("Token is null.");
-                    }
+						throw new Exception("Token is null.");
+					}
 
-                    await localStorageHelper!.SaveToken(TokenStorageName.EmailVerification, token);
+					await localStorageHelper!.SaveToken(TokenStorageName.EmailVerification, token);
 
 					navigationManager!.NavigateTo(Route.Verification);
 				}
@@ -133,8 +133,8 @@ namespace BaseMigrationUI.Pages
 					navigationManager!.NavigateTo(Route.BaseMigration);
 				}
 			}
-            catch (SystemException ex)
-            {
+			catch (SystemException ex)
+			{
 				Snackbar.Add(ex.Message, Severity.Error);
 			}
 			catch (Exception ex)

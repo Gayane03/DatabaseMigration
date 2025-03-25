@@ -84,11 +84,11 @@ namespace BusinessLayer.Autho
 		/// Jwt generats with UserId and user role 
 		/// </summary>
 		/// <returns></returns>
-		private IEnumerable<Claim> GenerateClaimsForJWT(string userId, string userRole)
+		private IEnumerable<Claim> GenerateClaimsForJWT(string userId, string role)
 		{
 			return new List<Claim>() {
 				  new Claim(JwtRegisteredClaimNames.Sub,userId),
-				  new Claim(ClaimTypes.Role, userRole)
+				  new Claim(ClaimTypes.Role, role)
 			};
 		}
 

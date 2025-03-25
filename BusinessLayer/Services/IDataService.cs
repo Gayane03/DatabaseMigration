@@ -5,7 +5,7 @@ namespace BusinessLayer.Services
 {
     public interface IDataService
     {
-        Task<Result<IEnumerable<MigratedTableRequest>>> GetTables(ServerRequest databaseRequest);
+        Task<Result<IEnumerable<MigratedTableResponse>>> GetTables(ServerRequest databaseRequest);
           
     }
 }

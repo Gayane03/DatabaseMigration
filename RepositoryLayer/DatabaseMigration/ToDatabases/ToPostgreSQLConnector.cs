@@ -22,10 +22,14 @@ namespace RepositoryLayer.DatabaseMigration.ToDatabases
                 createTableQuery.Append($"CREATE TABLE \"{tableName}\" (");
 
                 var primaryKeyColumns = new List<string>();
+				var uniqueConstraints = new List<string>();
+				var foreignKeys = new List<string>();
 
-                foreach (var column in columnsInfo)
+				foreach (var column in columnsInfo)
                 {
-                    createTableQuery.Append($"\"{column.Name}\" {ColumnTypeGenerator.GetColumnDatatType(fromServerType, ServerType.PostgreSQL, column?.DataType)} ");
+                    var columnType = ColumnTypeGenerator.GetColumnDataType(fromServerType, ServerType.PostgreSQL, column?.DataType);
+
+					createTableQuery.Append($"\"{column.Name}\" {columnType} ");
 
                     if (!column.IsNullable)
                     {
@@ -37,7 +41,22 @@ namespace RepositoryLayer.DatabaseMigration.ToDatabases
                         primaryKeyColumns.Add($"\"{column.Name}\"");
                     }
 
-                    createTableQuery.Append(", ");
+					if (column.HasDefault && !string.IsNullOrEmpty(column.DefaultValue))
+					{
+						createTableQuery.Append($"DEFAULT {ColumnTypeGenerator.GetColumnDefaultValue(fromServerType, ServerType.PostgreSQL,column.DefaultValue, column?.DataType)}");
+					}
+
+					if (column.IsUnique)
+					{
+						uniqueConstraints.Add($"UNIQUE (\"{column.Name}\")");
+					}
+
+					if (column.IsForeignKey && !string.IsNullOrEmpty(column.ForeignKeyTable) && !string.IsNullOrEmpty(column.ForeignKeyColumn))
+					{
+						foreignKeys.Add($"FOREIGN KEY (\"{column.Name}\") REFERENCES \"{column.ForeignKeyTable}\" (\"Id\")");
+					}
+
+					createTableQuery.Append(", ");
                 }
 
                 if (primaryKeyColumns.Count > 0)
@@ -45,7 +64,17 @@ namespace RepositoryLayer.DatabaseMigration.ToDatabases
                     createTableQuery.Append($"PRIMARY KEY ({string.Join(", ", primaryKeyColumns)}), ");
                 }
 
-                createTableQuery.Length -= 2;
+				if (uniqueConstraints.Count > 0)
+				{
+					createTableQuery.Append(string.Join(", ", uniqueConstraints) + ", ");
+				}
+
+				if (foreignKeys.Count > 0)
+				{
+					createTableQuery.Append(string.Join(", ", foreignKeys) + ", ");
+				}
+
+				createTableQuery.Length -= 2;
                 createTableQuery.Append(");");
 
                 var commandText = createTableQuery.ToString();
@@ -63,6 +92,12 @@ namespace RepositoryLayer.DatabaseMigration.ToDatabases
         {
             try
             {
+                if(tableData==  null || !tableData.Select(table => table.Keys).Any() || !tableData.Select(table => table.Values).Any())
+                {
+                    return;
+                }
+
+
                 var escapedTableName = $"\"{tableName}\"";
                 var columns = string.Join(", ", tableData.First().Keys.Select(key => $"\"{key}\""));
 

@@ -27,12 +27,18 @@ namespace RepositoryLayer.DatabaseMigration.FromDatabases
                 {
                     var columnInfo = new ColumnInfo
                     {
-                        Name = SqlReader!["COLUMN_NAME"].ToString(),
-                        DataType = SqlReader!["DATA_TYPE"].ToString(),
-                        MaxLength = SqlReader!["MaxLength"] as int?,
-                        IsPrimaryKey = Convert.ToBoolean(SqlReader!["IsPrimaryKey"]),
-                        IsNullable = Convert.ToBoolean(SqlReader!["IsNullable"])
-                    };
+						Name = SqlReader!["COLUMN_NAME"].ToString(),
+						DataType = SqlReader!["DATA_TYPE"].ToString(),
+						MaxLength = SqlReader["MaxLength"] as int?,
+						IsPrimaryKey = Convert.ToBoolean(SqlReader["IsPrimaryKey"]),
+						IsNullable = Convert.ToBoolean(SqlReader["IsNullable"]),
+						IsForeignKey = Convert.ToBoolean(SqlReader["IsForeignKey"]),
+						ForeignKeyTable = SqlReader["ForeignKeyTable"] as string,
+						ForeignKeyColumn = SqlReader["ForeignKeyColumn"] as string,
+						IsUnique = Convert.ToBoolean(SqlReader["IsUnique"]),
+						HasDefault = SqlReader["DefaultValue"] != DBNull.Value,
+						DefaultValue = SqlReader["DefaultValue"] as string ?? string.Empty,
+					};
 
                     columnsInfo.Add(columnInfo);
                 }

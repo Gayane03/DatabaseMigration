@@ -1,0 +1,59 @@
+﻿@page "/success"
+@inject NavigationManager Navigation
+@layout EmptyLayout;
+
+<style>
+    .overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: rgba(0, 0, 0, 0.4);
+        z-index: 9999;
+    }
+
+    .success-message {
+        background-color: #4CAF50;
+        color: white;
+        padding: 30px;
+        text-align: center;
+        border-radius: 20px;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+    }
+
+</style>
+
+
+@if (showSuccessMessage)
+{
+    <div class="overlay">
+        <MudPaper Class="success-message">
+            <MudIcon Icon="@Icons.Material.Filled.CheckCircle" Size="Size.Large" Color="Color.Success" />
+            <h2>Success!</h2>
+            <p>All processes completed successfully.</p>
+        </MudPaper>
+    </div>
+}
+
+@* <MudButton OnClick="CompleteProcess" Color="Color.Primary">Start Process</MudButton> *@
+
+@code {
+    private bool showSuccessMessage = false;
+
+    protected override async Task OnInitializedAsync()
+    {
+        // Show the success message
+        showSuccessMessage = true;
+
+        // Wait for 2 seconds
+        await Task.Delay(1000);
+
+        // Reload the page or navigate back
+        showSuccessMessage = false;
+        Navigation.NavigateTo(Navigation.Uri, forceLoad: true);
+    }
+}

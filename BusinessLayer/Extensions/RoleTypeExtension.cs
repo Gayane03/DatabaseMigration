@@ -8,7 +8,7 @@ namespace BusinessLayer.Extensions
 		{
 			return role switch { 
 				RoleType.Admin => "admin", 
-				RoleType.Developer => "developer", 
+				RoleType.User => "user", 
 				_ => throw new Exception("Role is not.") 
 			};
 		}

@@ -44,6 +44,8 @@
 
 	private async Task OnSendVerificationCode()
 	{
+		Snackbar.Configuration.PositionClass = Defaults.Classes.Position.TopCenter;
+
 		try
 		{
 			form?.Validate();
@@ -68,7 +70,7 @@
 				await localStorageHelper.RemoveToken(TokenStorageName.EmailVerification);
 				await localStorageHelper.SaveToken(TokenStorageName.UserAccess, registrationResponse.Token);
 
-				//need go to main page 
+				//need go to main page
 				navigationManager.NavigateTo(Route.BaseMigration);
 			}
 		}

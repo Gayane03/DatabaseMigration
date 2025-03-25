@@ -12,13 +12,7 @@ namespace BusinessLayer.Autho
 			this.config = config;
 		}
 		protected SigningCredentials GenerateKey()
-		{
-			var jwtKey = config["Jwt:Key"];
-			if (string.IsNullOrWhiteSpace(jwtKey))
-			{
-				throw new InvalidOperationException("JWT key is missing or empty.");
-			}
-
+		{ 
 			var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(config["Jwt:Key"]));
 			return new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
 		}

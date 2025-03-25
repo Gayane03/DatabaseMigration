@@ -207,12 +207,12 @@ namespace RepositoryLayer
             localConnection.Open();
 			return localConnection;
 		}
-		private SqlCommand OpenSqlCommand(string commandMessage, SqlConnection connection)
+		protected SqlCommand OpenSqlCommand(string commandMessage, SqlConnection connection)
 		{
 			return new SqlCommand(commandMessage, connection);
 		}
 
-		private async Task<SqlDataReader> OpenSqlDataReader(SqlCommand sqlCommand)
+		protected async Task<SqlDataReader> OpenSqlDataReader(SqlCommand sqlCommand)
 		{
 			var sqlDataReader = await sqlCommand.ExecuteReaderAsync();
 			return sqlDataReader;

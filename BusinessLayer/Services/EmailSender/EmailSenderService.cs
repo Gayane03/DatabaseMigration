@@ -8,7 +8,7 @@ namespace BusinessLayer.Services.EmailSender
 		public async Task SendEmailAsync(string toEmail, string verificationCode)
 		{
 
-			string fromEmail = "gayane.tsaturyan.2020@gmail.com";
+			string fromEmail = "*********@gmail.com";
 			string password = Environment.GetEnvironmentVariable("EMAIL_PASSWORD",EnvironmentVariableTarget.User);
 
 			try
@@ -28,7 +28,7 @@ namespace BusinessLayer.Services.EmailSender
 						IsBodyHtml = false,
 					};
 
-					mailMessage.To.Add("gayane.tsaturyan.2020@gmail.com");
+					mailMessage.To.Add("********@gmail.com");
 
 					await client.SendMailAsync(mailMessage);
 				}
